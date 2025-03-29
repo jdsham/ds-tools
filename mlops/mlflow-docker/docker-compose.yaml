@@ -1,0 +1,46 @@
+services:
+  postgres:
+    image: postgres:latest
+
+    environment:
+      POSTGRES_PASSWORD: mlflow_password
+      POSTGRES_DB: mlflow_db
+
+    ports:
+      - "5432:5432"
+
+    volumes:  
+      # If on Windows, use this:
+      - <YOUR BASE DIRECTORY>\pgsql\data:/var/lib/postgresql/
+      # If on Linux, use this:
+      #- <YOUR BASE DIRECTORY>/pgsql/data:/var/lib/postgresql/
+
+    networks:
+      - mlflow-network
+
+  mlflow-server:
+    depends_on:
+      - postgres
+
+    build: 
+      dockerfile: ./mlflow/Dockerfile
+
+    environment:
+      PGSQL_DB : mlflow_db
+      PGSQL_USER: postgres
+      PGSQL_PASSWORD: mlflow_password
+
+    ports:
+      - "5000:5000"
+
+    volumes:  
+    # If on Windows, use this:
+      - <BASE DIRECTORY>\mlflow\data:/var/mlflow-server
+    # If on Linux, use this:
+    # - <BASE DIRECTORY>/mlflow/data:/var/mlflow-server
+
+    networks:
+      - mlflow-network
+
+networks:
+  mlflow-network:
